@@ -32,7 +32,6 @@ namespace ChatRealTime.Entities
         [BsonElement("avatarImage")]
         [BsonDefaultValue("")]
         public string? AvatarImage { get; set; }
-        public object PasswordHash { get; internal set; }
 
     }
 }

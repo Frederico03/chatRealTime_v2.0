@@ -47,3 +47,4 @@ C:\Users\Frederico Garcêz\Documents\PROGRAMAÇÃO\c#\ChatRealTime\ChatRealTime\
 C:\Users\Frederico Garcêz\Documents\PROGRAMAÇÃO\c#\ChatRealTime\ChatRealTime\obj\Debug\net8.0\ChatRealTime.genruntimeconfig.cache
 C:\Users\Frederico Garcêz\Documents\PROGRAMAÇÃO\c#\ChatRealTime\ChatRealTime\obj\Debug\net8.0\ref\ChatRealTime.dll
 C:\Users\Frederico Garcêz\Documents\PROGRAMAÇÃO\c#\ChatRealTime\ChatRealTime\bin\Debug\net8.0\BCrypt.Net.dll
+C:\Users\Frederico Garcêz\Documents\PROGRAMAÇÃO\c#\ChatRealTime\ChatRealTime\obj\Debug\net8.0\ChatRealTime.sourcelink.json

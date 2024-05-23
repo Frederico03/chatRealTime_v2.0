@@ -1,10 +1,10 @@
+using System.Text.Json;
 using ChatRealTime.Data;
 using ChatRealTime.DTOs;
 using ChatRealTime.Entities;
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Bson.IO;
 using MongoDB.Driver;
-using BCrypt.Net;
-using System.Text.Json;
 
 namespace ChatRealTime.Controllers
 {
@@ -29,11 +29,11 @@ namespace ChatRealTime.Controllers
                     var users = await _users.Find(user => user.Id != id)
                                             .Project(user => new { user.Email, user.Username, user.AvatarImage, user.Id })
                                             .ToListAsync();
-                    return Ok(users);
+                    return Ok(new { users });
                 }
                 else
                 {
-                    return NotFound("A coleção de usuários não foi inicializada.");
+                    return BadRequest(new { message = "A coleção de usuários não foi inicializada.", status = false });
                 }
             }
             catch (Exception ex)
@@ -54,17 +54,17 @@ namespace ChatRealTime.Controllers
             try
             {
                 var filterName = Builders<User>.Filter.Eq(user => user.Username, userRegisterDto.Username);
-                var usernameCheck = _users.Find(filterName).FirstOrDefault();
+                var userInDb = await _users.FindAsync(filterName).Result.ToListAsync();
+                string? usernameCheck = userInDb[0].Username;
                 if (usernameCheck != null)
                 {
-                    return BadRequest(new { message = "Usuário já está sendo utilizado" });
+                    return BadRequest(new { message = "Usuário já está sendo utilizado", status = false });
                 }
 
-                var filterEmail = Builders<User>.Filter.Eq(user => user.Email, userRegisterDto.Email);
-                var emailCheck = _users.Find(filterEmail).FirstOrDefault();
+                var emailCheck = userInDb[0].Email;
                 if (emailCheck != null)
                 {
-                    return BadRequest(new { message = "Email já está sendo utilizado" });
+                    return BadRequest(new { message = "Email já está sendo utilizado", status = false });
                 }
 
                 var hashedPassword = BCrypt.Net.BCrypt.HashPassword(userRegisterDto.Password, 10);
@@ -86,6 +86,43 @@ namespace ChatRealTime.Controllers
             }
         }
 
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
+        {
+            if (loginDto == null)
+            {
+                return BadRequest("Invalid data.");
+            }
+
+            try
+            {
+                var filterName = Builders<User>.Filter.Eq(user => user.Username, loginDto.Username);
+                var userArray = await _users.FindAsync(filterName).Result.ToListAsync();
+                var user = userArray[0];
+                var usernameCheck = user.Username;
+                if (usernameCheck == null)
+                {
+                    return BadRequest(new { message = "Usuário ou senha incorreto!", status = false });
+                }
+
+                string? hashPassword = user.Password;
+                bool isPasswordValid = BCrypt.Net.BCrypt.Verify(loginDto.Password, hashPassword);
+                if (!isPasswordValid)
+                {
+                    return BadRequest(new { message = "Usuário ou senha incorreto!", status = false });
+                }
+                return Ok(new { status = true, user });
+            }
+            catch (System.Exception)
+            {
+                throw;
+            }
+        }
+
+        public string goToJson(object obj)
+        {
+            return JsonSerializer.Serialize(obj, new JsonSerializerOptions { WriteIndented = true });
+        }
 
     }
 }
