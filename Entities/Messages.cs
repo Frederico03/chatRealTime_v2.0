@@ -7,18 +7,18 @@ namespace ChatRealTime.Entities
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
-        public int Id { get; set; }
+        public string? Id { get; set; }
 
-        [BsonElement("Text")]
+        [BsonElement("message")]
         [BsonRequired]
-        public string? Text { get; set; }
+        public required MessageText Content { get; set; }
 
-        [BsonElement("Users")]
-        public List<User>? Users { get; set; }
+        [BsonElement("users")]
+        public List<string>? Users { get; set; }
 
-        [BsonElement("Sender")]
-        [BsonRequired]
-        public User? Sender { get; set; }
+        [BsonElement("sender")]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string? Sender { get; set; }
 
         [BsonDateTimeOptions(Kind = DateTimeKind.Local)]
         public DateTime Timestamp { get; set; }

@@ -3,7 +3,6 @@ using ChatRealTime.Data;
 using ChatRealTime.DTOs;
 using ChatRealTime.Entities;
 using Microsoft.AspNetCore.Mvc;
-using MongoDB.Bson.IO;
 using MongoDB.Driver;
 
 namespace ChatRealTime.Controllers
@@ -119,10 +118,38 @@ namespace ChatRealTime.Controllers
             }
         }
 
-        public string goToJson(object obj)
+        [HttpPost("setAvatar/{id}")]
+        public async Task<IActionResult> setAvatar(string id, [FromBody] ImageDto imageDto)
         {
-            return JsonSerializer.Serialize(obj, new JsonSerializerOptions { WriteIndented = true });
+            if (imageDto == null)
+            {
+                return BadRequest("Invalid data.");
+            }
+
+            try
+            {
+                var filter = Builders<User>.Filter.Eq(user => user.Id, id);
+                var update = Builders<User>.Update
+                    .Set(u => u.IsAvatarImageSet, true)
+                    .Set(u => u.AvatarImage, imageDto.Image);
+
+                var result = await _users?.UpdateOneAsync(filter, update);
+
+                if (result.MatchedCount == 0)
+                {
+                    return NotFound();
+                }
+
+                var user = await _users.Find(filter).FirstOrDefaultAsync();
+
+                return Ok(new { isSet = user.IsAvatarImageSet, image = imageDto.Image });
+            }
+            catch (System.Exception)
+            {
+                throw;
+            }
         }
+
 
     }
 }
